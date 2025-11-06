@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mrinal Kumar - FinTech Tools & PDF Generators</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        header {
+            text-align: center;
+            padding: 60px 0 40px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            font-size: 1.2rem;
+            font-weight: 300;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .projects {
+            padding: 60px 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        .project-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .project-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            background: rgba(255, 255, 255, 1);
+        }
+        .project-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .project-card h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .project-card p {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .project-link {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .project-link:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            background: rgba(0, 0, 0, 0.05);
+            margin-top: 60px;
+        }
+        .footer-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .developer {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #333;
+        }
+        .linkedin {
+            color: #0077b5;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .linkedin:hover {
+            text-decoration: underline;
+        }
+        .contact-email {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .contact-email:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            .projects {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .footer-content {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>FinTools Hub for BUs</h1>
+            <p class="subtitle">Elegant pdf Generators and Calculators Crafted for Seamless Customer Interaction, Simplify and to Save Time.</p>
+        </div>
+    </header>
+
+    <section class="projects">
+        <div class="container">
+            <div class="project-card">
+                <div class="project-icon">📄</div>
+                <h3>Insurance Form Generator</h3>
+                <p>Streamline insurance applications with customizable, compliant forms—ready to print or submit in seconds.</p>
+                <a href="https://insuranceformgenerator.netlify.app/" class="project-link" target="_blank">Launch Tool</a>
+            </div>
+            <div class="project-card">
+                <div class="project-icon">🧮</div>
+                <h3>Sahayata Loan Eligibility Calculator</h3>
+                <p>Quickly assess loan eligibility based on income, credit, and criteria—empower decisions with instant insights.</p>
+                <a href="https://sahayata-eligibility-calculator.netlify.app/" class="project-link" target="_blank">Launch Tool</a>
+            </div>
+            <div class="project-card">
+                <div class="project-icon">💌</div>
+                <h3>Overdue Demand Letter</h3>
+                <p>Generate professional overdue notices with personalized details, tones, and legal compliance—effortless collections.</p>
+                <a href="https://odnotice.netlify.app" class="project-link" target="_blank">Launch Tool</a>
+            </div>
+            <div class="project-card">
+                <div class="project-icon">🤝</div>
+                <h3>NPA Settlement Offer Letter</h3>
+                <p>Craft tailored settlement proposals for non-performing assets—clear terms, fair offers, and recovery acceleration.</p>
+                <a href="https://npasolg.netlify.app/" class="project-link" target="_blank">Launch Tool</a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <span class="developer">Developed by <a href="https://www.linkedin.com/in/mrinal-kumar-dey" target="_blank" class="linkedin">Mrinal Kumar</a></span>
+                <a href="mailto:mrinalkumardey@zohomail.in" class="contact-email">Get in Touch</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
