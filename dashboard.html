@@ -215,44 +215,64 @@
     </footer>
 
     <script>
-        // AUTH GUARD: Block if no session (runs first!)
-        if (localStorage.getItem('auth') !== 'true' || !isSessionValid()) {
-            localStorage.clear();
-            window.location.href = 'login.html';  // Adjust path if needed
-        }
+    // Session helper functions (moved up for guard to use them safely)
+    function isSessionValid() {
+        const loginTime = localStorage.getItem('loginTime');
+        return loginTime && (Date.now() - parseInt(loginTime)) < 1800000;  // 30 mins
+    }
 
-        // Session expiry check
-        function isSessionValid() {
-            const loginTime = localStorage.getItem('loginTime');
-            return loginTime && (Date.now() - parseInt(loginTime)) < 1800000;  // 30 mins
-        }
+    function logout() {
+        localStorage.clear();
+        window.location.href = 'login.html';
+    }
 
-        // Auto-logout timer (checks every minute)
-        setInterval(() => {
-            if (!isSessionValid()) {
-                logout();  // Clean exit
-            }
-        }, 60000);
+    // AUTH GUARD: Block if no session (runs first!)
+    if (localStorage.getItem('auth') !== 'true' || !isSessionValid()) {
+        localStorage.clear();
+        window.location.href = 'login.html';  // Adjust path if needed
+    }
 
-        // Logout function
-        function logout() {
-            localStorage.clear();
-            window.location.href = 'login.html';
-        }
+    // Token generation & link update (runs after guard)
+    const authToken = localStorage.getItem('authToken') || 'token_' + Math.random().toString(36).substring(7) + Date.now();
+    localStorage.setItem('authToken', authToken);  // Store for validation
 
-        // Personalize welcome (e.g., "Welcome back, mrinal!")
-        window.addEventListener('load', () => {
-            const userEmail = localStorage.getItem('userEmail') || 'User';
-            const username = userEmail.split('@')[0];  // Grabs first part (e.g., "mrinalkumardey")
-            document.getElementById('welcomeMsg').textContent = `Welcome back, ${username}!`;
-        });
-
-        // Refresh session on activity (optional: extend timer on clicks)
-        document.addEventListener('click', () => {
-            if (localStorage.getItem('auth') === 'true') {
-                localStorage.setItem('loginTime', Date.now());  // Reset timer
+    // Token-ize links (run on load)
+    document.addEventListener('DOMContentLoaded', () => {
+        const tools = [
+            'https://insuranceformgenerator.netlify.app/',
+            'https://sahayata-eligibility-calculator.netlify.app/',
+            'https://odnotice.netlify.app',
+            'https://npasolg.netlify.app/'
+        ];
+        tools.forEach(toolUrl => {
+            const link = document.querySelector(`a[href="${toolUrl}"]`);
+            if (link) {
+                link.href = toolUrl + '?token=' + authToken;
+                console.log(`Tokenized ${toolUrl} with ${authToken}`);  // Debug—remove later
             }
         });
-    </script>
+    });
+
+    // Auto-logout timer (checks every minute)
+    setInterval(() => {
+        if (!isSessionValid()) {
+            logout();  // Clean exit
+        }
+    }, 60000);
+
+    // Personalize welcome (e.g., "Welcome back, mrinal!")
+    window.addEventListener('load', () => {
+        const userEmail = localStorage.getItem('userEmail') || 'User';
+        const username = userEmail.split('@')[0];  // Grabs first part (e.g., "mrinalkumardey")
+        document.getElementById('welcomeMsg').textContent = `Welcome back, ${username}!`;
+    });
+
+    // Refresh session on activity (optional: extend timer on clicks)
+    document.addEventListener('click', () => {
+        if (localStorage.getItem('auth') === 'true') {
+            localStorage.setItem('loginTime', Date.now());  // Reset timer
+        }
+    });
+</script>
 </body>
 </html>
