@@ -1,145 +1,215 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinTools Hub - Authorized Access</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Login - BU Tool Dashboard</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             padding: 20px;
         }
+
         .login-container {
-            background: rgba(255, 255, 255, 0.95);
+            background: white;
             border-radius: 20px;
-            padding: 40px;
-            text-align: center;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+            padding: 50px 40px;
             width: 100%;
+            max-width: 420px;
         }
-        h2 {
-            font-size: 1.8rem;
-            font-weight: 600;
-            color: #2d3748;
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .login-header h1 {
+            font-size: 2rem;
+            color: #333;
             margin-bottom: 10px;
         }
-        p {
+
+        .login-header p {
             color: #666;
-            margin-bottom: 30px;
-            font-size: 1rem;
+            font-size: 0.95rem;
         }
-        input[type="email"] {
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        input {
             width: 100%;
-            padding: 12px 16px;
-            border: 1.5px solid #e2e8f0;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
             border-radius: 10px;
             font-size: 1rem;
-            margin-bottom: 15px;
-            transition: border-color 0.2s;
+            transition: border-color 0.3s;
         }
+
         input:focus {
             outline: none;
             border-color: #667eea;
         }
-        button {
+
+        .login-btn {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
             border-radius: 10px;
-            font-weight: 500;
             font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
         }
-        button:hover {
+
+        .login-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
         }
-        button:disabled {
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
         }
-        #error {
-            color: #e53e3e;
-            margin-top: 10px;
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
             font-size: 0.9rem;
             display: none;
         }
-        .admin-note {
-            font-size: 0.8rem;
-            color: #a0aec0;
-            margin-top: 20px;
+
+        .error-message.show {
+            display: block;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #999;
+            font-size: 0.85rem;
         }
     </style>
 </head>
 <body>
     <div class="login-container">
-        <h2>Authorized Access Only</h2>
-        <p>Enter your approved email to access FinTools Hub.</p>
-        <input type="email" id="emailInput" placeholder="e.g., john.doe@gmail.com" required>
-        <button onclick="checkAccess()">Enter</button>
-        <p id="error">Access denied. Contact admin for approval.</p>
-        <div class="admin-note">
-            <small>Need access? Reply to this deploy or email mrinal@zohomail.in</small>
+        <div class="login-header">
+            <h1>🔐 BU Tool Dashboard</h1>
+            <p>Sign in to access your tools</p>
+        </div>
+
+        <div id="errorMessage" class="error-message"></div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" placeholder="your.email@example.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Enter your password" required>
+            </div>
+
+            <button type="submit" class="login-btn" id="loginBtn">Sign In</button>
+        </form>
+
+        <div class="footer">
+            <p>Developed by <a href="https://www.linkedin.com/in/mrinal-kumar-dey" target="_blank" style="color: #667eea; text-decoration: none;">Mrinal Kumar</a></p>
         </div>
     </div>
 
-    <script>
-        // Whitelist: Add your specific emails here (case-insensitive)
-        const allowedEmails = [
-            'mrinalkumardey@zohomail.in',  // Yours!
-            'test.user@gmail.com',         // Example—swap with real ones
-            'jane.doe@yahoo.com',
-            // Add more as needed
-        ];
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        function checkAccess() {
-            const email = document.getElementById('emailInput').value.toLowerCase().trim();
-            const errorEl = document.getElementById('error');
-            errorEl.style.display = 'none';
+        const firebaseConfig = {
+            apiKey: "AIzaSyB6LOUAmiHidHdAQB2WzTLR4cq7cs6h720",
+            authDomain: "bu-tools-dashboard.firebaseapp.com",
+            projectId: "bu-tools-dashboard",
+            storageBucket: "bu-tools-dashboard.firebasestorage.app",
+            messagingSenderId: "856733218195",
+            appId: "1:856733218195:web:3bf4794d70ecd04eb3a466"
+        };
 
-            if (!email) {
-                errorEl.textContent = 'Please enter your email.';
-                errorEl.style.display = 'block';
-                return;
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Check if user is already logged in
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                window.location.href = 'dashboard.html';
             }
+        });
 
-            if (allowedEmails.includes(email)) {
-                localStorage.setItem('auth', 'true');
-                localStorage.setItem('userEmail', email);  // For personalization/watermarks
-                localStorage.setItem('loginTime', Date.now());  // For 30-min expiry
-                window.location.href = 'dashboard.html';  // Your homepage
-            } else {
-                errorEl.textContent = 'Access denied. Contact admin for approval.';
-                errorEl.style.display = 'block';
+        const loginForm = document.getElementById('loginForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const loginBtn = document.getElementById('loginBtn');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            errorMessage.classList.remove('show');
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Signing in...';
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                // Redirect happens automatically via onAuthStateChanged
+            } catch (error) {
+                console.error('Login error:', error);
+                
+                let message = 'Failed to sign in. Please check your credentials.';
+                if (error.code === 'auth/user-not-found') {
+                    message = 'No account found with this email.';
+                } else if (error.code === 'auth/wrong-password') {
+                    message = 'Incorrect password.';
+                } else if (error.code === 'auth/invalid-email') {
+                    message = 'Invalid email address.';
+                } else if (error.code === 'auth/too-many-requests') {
+                    message = 'Too many failed attempts. Please try again later.';
+                }
+                
+                errorMessage.textContent = message;
+                errorMessage.classList.add('show');
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Sign In';
             }
-        }
-
-        // Auto-redirect if already logged in
-        if (localStorage.getItem('auth') === 'true' && isSessionValid()) {
-            window.location.href = 'dashboard.html';
-        }
-
-        // Check session expiry (30 mins = 1800000 ms)
-        function isSessionValid() {
-            const loginTime = localStorage.getItem('loginTime');
-            return loginTime && (Date.now() - parseInt(loginTime)) < 1800000;
-        }
-
-        // Enter key support
-        document.getElementById('emailInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') checkAccess();
         });
     </script>
 </body>

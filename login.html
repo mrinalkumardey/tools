@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Create Users</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .admin-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+            padding: 50px 40px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .admin-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .admin-header h1 {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .admin-header p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .create-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        .create-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .create-btn:active {
+            transform: translateY(0);
+        }
+
+        .create-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .back-btn {
+            width: 100%;
+            padding: 14px;
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 15px;
+        }
+
+        .back-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 5px;
+        }
+
+        .info-box p {
+            color: #0c5393;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .password-note {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>🔑 Create New User</h1>
+            <p>Add users to BU Tool Dashboard</p>
+        </div>
+
+        <div class="info-box">
+            <p><strong>Important:</strong> This page allows you to create new user accounts. The user will receive their login credentials and can sign in using the provided email and password.</p>
+        </div>
+
+        <div id="message" class="message"></div>
+
+        <form id="createUserForm">
+            <div class="form-group">
+                <label for="email">User Email Address</label>
+                <input type="email" id="email" placeholder="user@example.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Minimum 6 characters" required minlength="6">
+                <div class="password-note">Password must be at least 6 characters long</div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" placeholder="Re-enter password" required minlength="6">
+            </div>
+
+            <button type="submit" class="create-btn" id="createBtn">Create User Account</button>
+            <button type="button" class="back-btn" onclick="window.location.href='dashboard.html'">Back to Dashboard</button>
+        </form>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB6LOUAmiHidHdAQB2WzTLR4cq7cs6h720",
+            authDomain: "bu-tools-dashboard.firebaseapp.com",
+            projectId: "bu-tools-dashboard",
+            storageBucket: "bu-tools-dashboard.firebasestorage.app",
+            messagingSenderId: "856733218195",
+            appId: "1:856733218195:web:3bf4794d70ecd04eb3a466"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        const createUserForm = document.getElementById('createUserForm');
+        const message = document.getElementById('message');
+        const createBtn = document.getElementById('createBtn');
+
+        // Check if admin is logged in
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            }
+        });
+
+        function showMessage(text, type) {
+            message.textContent = text;
+            message.className = `message show ${type}`;
+            setTimeout(() => {
+                message.classList.remove('show');
+            }, 5000);
+        }
+
+        createUserForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // Validation
+            if (password !== confirmPassword) {
+                showMessage('Passwords do not match!', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showMessage('Password must be at least 6 characters long!', 'error');
+                return;
+            }
+
+            message.classList.remove('show');
+            createBtn.disabled = true;
+            createBtn.textContent = 'Creating account...';
+
+            try {
+                // Note: This will sign in the newly created user automatically
+                // We'll need to sign back in as admin after
+                const currentUser = auth.currentUser;
+                
+                await createUserWithEmailAndPassword(auth, email, password);
+                
+                showMessage(`✓ Account created successfully for ${email}`, 'success');
+                
+                // Clear form
+                createUserForm.reset();
+                
+                createBtn.disabled = false;
+                createBtn.textContent = 'Create User Account';
+
+                // Show credentials
+                setTimeout(() => {
+                    alert(`User created successfully!\n\nEmail: ${email}\nPassword: ${password}\n\nPlease share these credentials with the user securely.`);
+                }, 500);
+
+            } catch (error) {
+                console.error('Create user error:', error);
+                
+                let errorMsg = 'Failed to create user account.';
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMsg = 'This email is already registered.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMsg = 'Invalid email address.';
+                } else if (error.code === 'auth/weak-password') {
+                    errorMsg = 'Password is too weak. Use at least 6 characters.';
+                }
+                
+                showMessage(errorMsg, 'error');
+                createBtn.disabled = false;
+                createBtn.textContent = 'Create User Account';
+            }
+        });
+    </script>
+</body>
+</html>
