@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insurance Form Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 10px;
+            max-width: 600px;
+            margin: auto;
+            position: relative;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input[type="text"], input[type="file"], select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px;
+            color: white;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        #generateBtn, #printBtn {
+            width: 48%;
+        }
+        #generateBtn {
+            background-color: #4CAF50;
+        }
+        #generateBtn:hover:not(:disabled) {
+            background-color: #45a049;
+        }
+        #printBtn {
+            background-color: #2196F3;
+        }
+        #printBtn:hover:not(:disabled) {
+            background-color: #1e87db;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #resetBtn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 120px;
+            background-color: #f44336;
+        }
+        #resetBtn:hover:not(:disabled) {
+            background-color: #da190b;
+        }
+        #pdfTypeSelection, #branchSelection {
+            margin-bottom: 20px;
+        }
+        #pdfTypeSelection label, #branchSelection label {
+            display: inline;
+            margin-right: 15px;
+        }
+        #loading {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border-radius: 5px;
+        }
+        .input-with-symbol {
+            position: relative;
+        }
+        .input-with-symbol input {
+            padding-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <button type="button" id="resetBtn" onclick="resetForm()">Reset Form</button>
+    <h2>Insurance Form Generator</h2>
+    <div id="branchSelection">
+        <label>Select Branch:</label>
+        <select id="branch" onchange="updateBranch()">
+            <option value="moran2">Moran 2</option>
+            <option value="moran">Moran</option>
+            <option value="kotoha">Kotoha</option>
+            <option value="thakurthan">Thakurthan</option>
+            <option value="jajoli">Jajoli</option>
+            <option value="latumoni">Latumoni</option>
+        </select>
+    </div>
+    <div id="pdfTypeSelection">
+        <label>Select PDF Type:</label><br>
+        <input type="radio" id="life" name="pdfType" value="life" checked onchange="updatePDFType()">
+        <label for="life">Life Insurance</label>
+        <input type="radio" id="health" name="pdfType" value="health" onchange="updatePDFType()">
+        <label for="health">Health Insurance</label>
+    </div>
+    <form id="customerForm">
+        <label>Upload Your PDF (optional, defaults to selected branch template):</label>
+        <input type="file" id="pdfUpload" accept=".pdf" onchange="loadPDF()">
+
+        <label>Customer Name:</label>
+        <input type="text" id="name" placeholder="Enter name">
+
+        <label>PAN:</label>
+        <input type="text" id="pan" placeholder="Enter PAN" oninput="this.value = this.value.toUpperCase()">
+
+        <label>Contact No:</label>
+        <input type="text" id="contact" placeholder="Enter contact number">
+
+        <label>Email:</label>
+        <input type="text" id="email" placeholder="Enter email">
+
+        <label>CIF:</label>
+        <input type="text" id="cif" placeholder="Enter CIF">
+
+        <label>A/C No:</label>
+        <input type="text" id="account" placeholder="Enter account number">
+
+        <label>Nominee:</label>
+        <input type="text" id="nominee" placeholder="Enter nominee name">
+
+        <label>Relationship of Nominee:</label>
+        <select id="relationship">
+            <option value="Spouse">Spouse</option>
+            <option value="Mother">Mother</option>
+            <option value="Father">Father</option>
+            <option value="Brother">Brother</option>
+            <option value="Sister">Sister</option>
+            <option value="Major Son">Major Son</option>
+            <option value="Major Daughter">Major Daughter</option>
+        </select>
+
+        <label>Gender of Nominee:</label>
+        <input type="text" id="gender" placeholder="Enter gender of nominee">
+
+        <label>Insured Amount:</label>
+        <input type="text" id="insured" placeholder="Enter insured amount">
+
+        <label>In Word:</label>
+        <input type="text" id="inWord" placeholder="Enter amount in words" readonly>
+
+        <label>Tenure (Page 1):</label>
+        <select id="tenure">
+            <option value="1">1 Year</option>
+            <option value="2">2 Years</option>
+            <option value="3">3 Years</option>
+        </select>
+
+        <label>Premium:</label>
+        <div class="input-with-symbol">
+            <input type="text" id="premium" placeholder="Enter premium amount">
+        </div>
+
+        <label>RE/RO Name (Page 2):</label>
+        <input type="text" id="reroName" placeholder="Enter RE/RO name">
+
+        <label>Employee ID (Page 2):</label>
+        <input type="text" id="employeeId" placeholder="Enter employee ID">
+
+        <label>Date (Page 2):</label>
+        <input type="text" id="date" placeholder="Enter date (e.g., DD/MM/YYYY)">
+
+        <div class="button-container">
+            <button type="button" id="generateBtn" onclick="generatePDF()" disabled>Generate PDF</button>
+            <button type="button" id="printBtn" onclick="printPDF()" disabled>Print PDF</button>
+        </div>
+    </form>
+    <div id="loading">Generating PDF...</div>
+
+    <script src="https://unpkg.com/pdf-lib@1.17.0/dist/pdf-lib.min.js"></script>
+    <script>
+        const state = {
+    originalPdfBytes: null,
+    currentPdfType: 'life',
+    currentBranch: 'moran2',
+    pdfTemplates: {
+        moran2: { life: null, health: null },
+        moran: { life: null, health: null },
+        kotoha: { life: null, health: null },
+        thakurthan: { life: null, health: null },
+        jajoli: { life: null, health: null },
+        latumoni: { life: null, health: null }
+    }
+};
+
+        // Utility functions
+        function getTodayDate() {
+            const today = new Date();
+            return `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+
+        function enableButtons(enable) {
+            document.getElementById('generateBtn').disabled = !enable;
+            document.getElementById('printBtn').disabled = !enable;
+        }
+
+        // Number to Words conversion (Indian style)
+        function numberToWords(num) {
+            const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+            const tens = ['', 'Ten', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+            const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+            const units = ['', 'Thousand', 'Lakh', 'Crore'];
+
+            if (!num || isNaN(num)) return '';
+            num = parseFloat(num).toString().replace(/\..*/g,''); // Remove decimals
+
+            if (num === '0') return 'Zero';
+
+            let str = '';
+            let crore = Math.floor(num / 10000000);
+            num %= 10000000;
+            let lakh = Math.floor(num / 100000);
+            num %= 100000;
+            let thousand = Math.floor(num / 1000);
+            num %= 1000;
+            let hundred = Math.floor(num / 100);
+            num %= 100;
+
+            if (crore > 0) {
+                str += numberToWords(crore) + ' Crore ';
+            }
+            if (lakh > 0) {
+                str += numberToWords(lakh) + ' Lakh ';
+            }
+            if (thousand > 0) {
+                str += numberToWords(thousand) + ' Thousand ';
+            }
+            if (hundred > 0) {
+                str += ones[hundred] + ' Hundred ';
+            }
+            if (num > 0) {
+                if (str !== '') str += 'and ';
+                if (num < 10) str += ones[num];
+                else if (num < 20) str += teens[num - 10];
+                else str += tens[Math.floor(num / 10)] + (num % 10 > 0 ? ' ' + ones[num % 10] : '');
+            }
+
+            return str.trim();
+        }
+
+        // Load PDF templates for a branch
+        async function loadBranchTemplates(branch) {
+            try {
+                const lifeResponse = await fetch(`./${branch}-life.base64`);
+                if (!lifeResponse.ok) throw new Error(`Failed to fetch ${branch} life insurance template`);
+                state.pdfTemplates[branch].life = await lifeResponse.text();
+
+                const healthResponse = await fetch(`./${branch}-health.base64`);
+                if (!healthResponse.ok) throw new Error(`Failed to fetch ${branch} health insurance template`);
+                state.pdfTemplates[branch].health = await healthResponse.text();
+
+                console.log(`${branch} templates loaded`);
+            } catch (error) {
+                console.error(error.message);
+                state.pdfTemplates[branch].life = null;
+                state.pdfTemplates[branch].health = null;
+                alert(`Failed to load ${branch} templates. Please upload a PDF manually.`);
+            }
+        }
+
+        // Calculate premium based on type, tenure, and insured amount
+        function calculatePremium() {
+            const tenure = document.getElementById('tenure').value;
+            const insured = parseFloat(document.getElementById('insured').value) || 0;
+            const premiumInput = document.getElementById('premium');
+            let premium = '';
+
+            if (state.currentPdfType === 'health') {
+                premium = tenure === '1' ? '149' : tenure === '2' ? '289' : '';
+            } else if (state.currentPdfType === 'life') {
+                const lifePremiumMap = {
+                    '1': {
+                        '50000': '309.50',
+                        '100000': '619',
+                        '150000': '928.50',
+                        '200000': '1238'
+                    },
+                    '2': {
+                        '100000': '1244',
+                        '150000': '1866',
+                        '200000': '2488'
+                    },
+                    '3': {
+                        '100000': '1857',
+                        '150000': '2785.50',
+                        '200000': '3598'
+                    }
+                };
+                premium = lifePremiumMap[tenure] && lifePremiumMap[tenure][insured.toString()] || '';
+            }
+
+            premiumInput.value = premium;
+        }
+
+        // PDF loading and type handling
+        async function loadPDFBytes(base64OrFile) {
+            try {
+                if (typeof base64OrFile === 'string') {
+                    const base64Data = base64OrFile.startsWith('data:application/pdf;base64,') 
+                        ? base64OrFile.split(',')[1] 
+                        : base64OrFile;
+                    const binaryString = atob(base64Data);
+                    const bytes = new Uint8Array(binaryString.length);
+                    for (let i = 0; i < binaryString.length; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
+                    }
+                    return bytes.buffer;
+                } else if (base64OrFile instanceof File) {
+                    return await base64OrFile.arrayBuffer();
+                }
+                throw new Error('Invalid PDF source');
+            } catch (error) {
+                throw new Error(`Error loading PDF: ${error.message}`);
+            }
+        }
+
+        function updateBranch() {
+            state.currentBranch = document.getElementById('branch').value;
+            loadEmbeddedPDF();
+        }
+
+        function updatePDFType() {
+            state.currentPdfType = document.querySelector('input[name="pdfType"]:checked').value;
+            const tenureSelect = document.getElementById('tenure');
+            tenureSelect.innerHTML = state.currentPdfType === 'life'
+                ? '<option value="1">1 Year</option><option value="2">2 Years</option><option value="3">3 Years</option>'
+                : '<option value="1">1 Year</option><option value="2">2 Years</option>';
+            loadEmbeddedPDF();
+            calculatePremium();
+        }
+
+        async function loadEmbeddedPDF() {
+            try {
+                const branch = state.currentBranch;
+                const type = state.currentPdfType;
+
+                // Load templates if not already loaded
+                if (!state.pdfTemplates[branch].life || !state.pdfTemplates[branch].health) {
+                    await loadBranchTemplates(branch);
+                }
+
+                const pdfData = state.pdfTemplates[branch][type];
+                if (!pdfData) throw new Error(`No ${type} template for ${branch}`);
+
+                state.originalPdfBytes = await loadPDFBytes(pdfData);
+                enableButtons(true);
+                console.log(`${branch} ${type} template loaded`);
+            } catch (error) {
+                console.error(error.message);
+                alert(`Couldn’t load ${state.currentBranch} ${state.currentPdfType} template. Please upload a PDF manually.`);
+                state.originalPdfBytes = null;
+                enableButtons(false);
+            }
+        }
+
+        async function loadPDF() {
+            const file = document.getElementById('pdfUpload').files[0];
+            if (!file) {
+                alert('Please select a PDF file!');
+                return;
+            }
+            try {
+                state.originalPdfBytes = await loadPDFBytes(file);
+                enableButtons(true);
+                alert('PDF uploaded successfully!');
+            } catch (error) {
+                alert(error.message);
+                state.originalPdfBytes = null;
+                enableButtons(false);
+            }
+        }
+
+        // Function to update gender based on relationship
+        function updateGender() {
+            const relationship = document.getElementById('relationship').value;
+            const genderInput = document.getElementById('gender');
+            const genderMap = {
+                'Spouse': '',
+                'Mother': 'Female',
+                'Father': 'Male',
+                'Brother': 'Male',
+                'Sister': 'Female',
+                'Major Son': 'Male',
+                'Major Daughter': 'Female'
+            };
+            genderInput.value = genderMap[relationship] || '';
+        }
+
+        // PDF generation
+        async function createFilledPDF() {
+            if (!state.originalPdfBytes) throw new Error('No PDF loaded!');
+            showLoading(true);
+            try {
+                const pdfDoc = await PDFLib.PDFDocument.load(state.originalPdfBytes);
+
+                const formData = {
+                    name: document.getElementById('name').value || '',
+                    pan: document.getElementById('pan').value || '',
+                    contact: document.getElementById('contact').value || '',
+                    email: document.getElementById('email').value || '',
+                    cif: document.getElementById('cif').value || '',
+                    account: document.getElementById('account').value || '',
+                    nominee: document.getElementById('nominee').value || '',
+                    insured: document.getElementById('insured').value || '',
+                    inWord: document.getElementById('inWord').value || '',
+                    tenure: document.getElementById('tenure').value || '1',
+                    gender: document.getElementById('gender').value || '',
+                    relationship: document.getElementById('relationship').value || '',
+                    premium: document.getElementById('premium').value || '',
+                    reroName: document.getElementById('reroName').value || '',
+                    employeeId: document.getElementById('employeeId').value || '',
+                    date: document.getElementById('date').value || ''
+                };
+
+                const page1 = pdfDoc.getPage(0);
+                const page2 = pdfDoc.getPageCount() < 2 ? pdfDoc.addPage([595, 842]) : pdfDoc.getPage(1);
+                const healthOffset = state.currentPdfType === 'health' ? -10 : 0;
+                const yOffset = state.currentPdfType === 'health' ? -12 : 0;
+                const healthExtraOffset = state.currentPdfType === 'health' ? -2 : 0;
+
+                // Page 1
+                if (formData.name) {
+                    const nameY = state.currentPdfType === 'health' ? 655 : 655;
+                    page1.drawText(formData.name.toUpperCase(), { x: 202, y: nameY, size: 8, maxWidth: 200 });
+                }
+                if (formData.pan) {
+                    page1.drawText(formData.pan.toUpperCase(), { x: 72, y: 641, size: 10, maxWidth: 200 });
+                }
+                if (formData.contact) page1.drawText(formData.contact, { x: 338, y: 641, size: 10, maxWidth: 200 });
+                if (formData.email) page1.drawText(formData.email, { x: 114, y: 630, size: 8, maxWidth: 200 });
+                if (formData.cif) page1.drawText(formData.cif, { x: 324, y: 628, size: 10, maxWidth: 200 });
+                if (formData.account) page1.drawText(formData.account, { x: 79, y: 616, size: 10, maxWidth: 200 });
+                if (formData.nominee) page1.drawText(formData.nominee.toUpperCase(), { x: 158, y: 480 + healthOffset, size: 10, maxWidth: 200 });
+                if (state.currentPdfType === 'life' && formData.insured) page1.drawText(formData.insured, { x: 165, y: 504, size: 10, maxWidth: 200 });
+                if (state.currentPdfType === 'life' && formData.inWord) page1.drawText(formData.inWord, { x: 302, y: 504, size: 10, maxWidth: 200 });
+                const bulletX = formData.tenure === '1' ? 281 : formData.tenure === '2' ? 335 : 390;
+                page1.drawText('•', { x: bulletX, y: 523, size: 25 });
+                if (formData.gender) {
+                    const genderY = 368 + healthOffset + healthExtraOffset;
+                    page1.drawText(formData.gender, { x: 173, y: genderY, size: 10, maxWidth: 200 });
+                }
+                if (formData.relationship) {
+                    const lifeRelationshipPositions = {
+                        'Spouse': { x: 125, y: 424 },
+                        'Mother': { x: 215, y: 424 },
+                        'Father': { x: 305, y: 424 },
+                        'Brother': { x: 410, y: 424 },
+                        'Sister': { x: 120, y: 400 },
+                        'Major Son': { x: 227, y: 400 },
+                        'Major Daughter': { x: 347, y: 400 }
+                    };
+                    const healthRelationshipPositions = {
+                        'Spouse': { x: 125, y: 412 },
+                        'Mother': { x: 216, y: 412 },
+                        'Father': { x: 305, y: 412 },
+                        'Brother': { x: 410, y: 412 },
+                        'Sister': { x: 121, y: 388 },
+                        'Major Son': { x: 227, y: 388 },
+                        'Major Daughter': { x: 348, y: 388 }
+                    };
+                    const positions = state.currentPdfType === 'health' ? healthRelationshipPositions : lifeRelationshipPositions;
+                    const pos = positions[formData.relationship];
+                    page1.drawText('•', { x: pos.x, y: pos.y, size: 25 });
+                }
+                if (formData.premium) {
+                    const premiumY = state.currentPdfType === 'health' ? 258 : 270;
+                    page1.drawText(formData.premium, { x: 461, y: premiumY, size: 10, maxWidth: 200 });
+                }
+
+                // Page 2
+                if (formData.name) {
+                    const nameYPage2 = 520 + yOffset + healthExtraOffset;
+                    page2.drawText(formData.name.toUpperCase(), { x: 125, y: nameYPage2, size: 10, maxWidth: 200 });
+                }
+                if (formData.reroName) {
+                    const reroNameY = 520 + yOffset + healthExtraOffset;
+                    page2.drawText(formData.reroName.toUpperCase(), { x: 380, y: reroNameY, size: 10, maxWidth: 200 });
+                }
+                if (formData.employeeId) page2.drawText(formData.employeeId, { x: 410, y: 495 + yOffset, size: 10, maxWidth: 200 });
+                if (formData.date) page2.drawText(formData.date, { x: 120, y: 482 + yOffset, size: 10, maxWidth: 200 });
+                if (formData.date) page2.drawText(formData.date, { x: 375, y: 456 + yOffset, size: 10, maxWidth: 200 });
+
+                return await pdfDoc.save();
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Main actions
+        async function generatePDF() {
+            try {
+                const pdfBytes = await createFilledPDF();
+                const fileName = document.getElementById('name').value
+                    ? `${document.getElementById('name').value.replace(/[^a-zA-Z0-9_-]/g, '_')}_${state.currentBranch}_${state.currentPdfType}_filled.pdf`
+                    : `${state.currentBranch}_${state.currentPdfType}_filled_customer.pdf`;
+                download(pdfBytes, fileName, 'application/pdf');
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        async function printPDF() {
+            try {
+                const pdfBytes = await createFilledPDF();
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                const printWindow = window.open('', '_blank');
+                if (printWindow) {
+                    printWindow.document.write(`
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <title>Print PDF</title>
+                            <style>
+                                body { margin: 0; font-family: Arial, sans-serif; }
+                                iframe { width: 100%; height: 90vh; border: none; }
+                                .instructions { padding: 10px; text-align: center; background: #f0f0f0; }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="instructions">
+                                Press Ctrl+P (Cmd+P on Mac) to print this PDF, then close this tab.
+                            </div>
+                            <iframe src="${url}"></iframe>
+                        </body>
+                        </html>
+                    `);
+                    printWindow.document.close();
+                    printWindow.onunload = () => URL.revokeObjectURL(url);
+                } else {
+                    alert('Popup blocked! Please allow popups for this site.');
+                }
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        function resetForm() {
+            const form = document.getElementById('customerForm');
+            form.reset();
+            document.getElementById('date').value = getTodayDate();
+            document.getElementById('inWord').value = '';
+            updateGender();
+            calculatePremium();
+        }
+
+        function download(data, fileName, mimeType) {
+            const blob = new Blob([data], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        // Initialize
+        window.onload = () => {
+            document.getElementById('date').value = getTodayDate();
+            state.currentBranch = document.getElementById('branch').value; // Set initial branch
+            updatePDFType();
+            document.getElementById('relationship').addEventListener('change', updateGender);
+            document.getElementById('tenure').addEventListener('change', calculatePremium);
+            document.getElementById('insured').addEventListener('input', () => {
+                calculatePremium();
+                const insuredValue = document.getElementById('insured').value;
+                document.getElementById('inWord').value = numberToWords(insuredValue);
+            });
+            document.getElementById('pdfTypeSelection').addEventListener('change', calculatePremium);
+            updateGender();
+            calculatePremium();
+        };
+    </script>
+</body>
+</html>
