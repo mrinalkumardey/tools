@@ -4,6 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Overdue Notice Letter Generator</title>
+    <!-- Firebase Auth Check -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyB6LOUAmiHidHdAQB2WzTLR4cq7cs6h720",
+        authDomain: "bu-tools-dashboard.firebaseapp.com",
+        projectId: "bu-tools-dashboard",
+        storageBucket: "bu-tools-dashboard.firebasestorage.app",
+        messagingSenderId: "856733218195",
+        appId: "1:856733218195:web:3bf4794d70ecd04eb3a466"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // Check authentication
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            // Not logged in - redirect to login page
+            window.location.href = '/';
+        }
+    });
+</script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -429,4 +454,5 @@
         };
     </script>
 </body>
+
 </html>
