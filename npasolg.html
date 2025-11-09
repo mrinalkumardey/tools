@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settlement Offer Letter Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 10px;
+            max-width: 600px;
+            margin: auto;
+            position: relative;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input[type="text"], input[type="date"], select, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        table {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        button {
+            padding: 10px;
+            color: white;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        #generateBtn, #printBtn {
+            width: 48%;
+        }
+        #generateBtn {
+            background-color: #4CAF50;
+        }
+        #generateBtn:hover:not(:disabled) {
+            background-color: #45a049;
+        }
+        #printBtn {
+            background-color: #2196F3;
+        }
+        #printBtn:hover:not(:disabled) {
+            background-color: #1e87db;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #resetBtn {
+            width: 120px;
+            background-color: #f44336;
+            margin-top: 10px;
+        }
+        #resetBtn:hover:not(:disabled) {
+            background-color: #da190b;
+        }
+        #loading {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border-radius: 5px;
+        }
+        .input-with-symbol {
+            position: relative;
+        }
+        .input-with-symbol::before {
+            content: '₹';
+            position: absolute;
+            left: 10px;
+            top: 8px;
+        }
+        .input-with-symbol input {
+            padding-left: 20px;
+        }
+        .readonly {
+            background-color: #f0f0f0;
+        }
+        .developer-info {
+            text-align: center;
+            font-size: 12px;
+            margin-top: 20px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <h2>Settlement Offer Letter Generator</h2>
+    <form id="letterForm">
+        <label>Ref No:</label>
+        <input type="text" id="refNo" placeholder="Enter ref no">
+
+        <label>Offer Date:</label>
+        <input type="date" id="offerDate" value="2025-10-15">
+
+        <label>Branch:</label>
+        <input type="text" id="branch" placeholder="Enter branch">
+
+        <label>Loan A/C No:</label>
+        <input type="text" id="loanAcNo" placeholder="Enter loan A/C no">
+
+        <label>Loan Amount:</label>
+        <div class="input-with-symbol">
+            <input type="text" id="loanAmount" placeholder="Enter loan amount" oninput="updateWords()">
+        </div>
+
+        <label>Loan Amount in Words:</label>
+        <input type="text" id="loanWords" readonly class="readonly">
+
+        <label>Outstanding Amount:</label>
+        <div class="input-with-symbol">
+            <input type="text" id="outstandingAmount" placeholder="Enter outstanding amount" oninput="updateWords()">
+        </div>
+
+        <label>Outstanding Amount in Words:</label>
+        <input type="text" id="outstandingWords" readonly class="readonly">
+
+        <label>Outstanding As On Date:</label>
+        <input type="date" id="outstandingAsOn" value="2025-10-15">
+
+        <label>Full & Final Payment:</label>
+        <div class="input-with-symbol">
+            <input type="text" id="settlementAmount" placeholder="Enter full & final payment" oninput="updateWords()">
+        </div>
+
+        <label>Full & Final Payment in Words:</label>
+        <input type="text" id="settlementWords" readonly class="readonly">
+
+        <label>Payment Schedule:</label>
+        <table id="paymentTable" border="1" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>SL No</th>
+                    <th>Date (On or Before)</th>
+                    <th>Mode of Payment</th>
+                    <th>Amount (In rupees)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td><input type="text" class="paymentDate" placeholder="DD/MM/YYYY"></td>
+                    <td><input type="text" class="paymentMode" value="Cash"></td>
+                    <td><div class="input-with-symbol"><input type="text" class="paymentAmount" placeholder="Enter amount"></div></td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td><input type="text" class="paymentDate" placeholder="DD/MM/YYYY"></td>
+                    <td><input type="text" class="paymentMode" value="Cash"></td>
+                    <td><div class="input-with-symbol"><input type="text" class="paymentAmount" placeholder="Enter amount"></div></td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td><input type="text" class="paymentDate" placeholder="DD/MM/YYYY"></td>
+                    <td><input type="text" class="paymentMode" value="Cash"></td>
+                    <td><div class="input-with-symbol"><input type="text" class="paymentAmount" placeholder="Enter amount"></div></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <label>Valid Till Date:</label>
+        <input type="date" id="validTill">
+
+        <label>Authorised Signatory:</label>
+        <input type="text" id="signatory" placeholder="Enter signatory name">
+
+        <div class="button-container">
+            <button type="button" id="generateBtn" onclick="generatePDF()">Generate PDF</button>
+            <button type="button" id="printBtn" onclick="printPDF()">Print PDF</button>
+        </div>
+        <button type="button" id="resetBtn" onclick="resetForm()">Reset Form</button>
+    </form>
+    <div id="loading">Generating PDF...</div>
+    <div class="developer-info">
+        Developed by <a href="https://www.linkedin.com/in/mrinal-kumar-dey" target="_blank">Mrinal Kumar</a>
+    </div>
+
+    <script src="https://unpkg.com/pdf-lib@1.17.0/dist/pdf-lib.min.js"></script>
+    <script>
+        // Number to Words conversion (Indian style)
+        function numberToWords(num) {
+            const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+            const tens = ['', 'Ten', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+            const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+            const units = ['', 'Thousand', 'Lakh', 'Crore'];
+
+            if (!num || isNaN(num)) return '';
+            num = parseFloat(num).toString().replace(/\..*/g, ''); // Remove decimals
+
+            if (num === '0') return 'Zero';
+
+            let str = '';
+            let crore = Math.floor(num / 10000000);
+            num %= 10000000;
+            let lakh = Math.floor(num / 100000);
+            num %= 100000;
+            let thousand = Math.floor(num / 1000);
+            num %= 1000;
+            let hundred = Math.floor(num / 100);
+            num %= 100;
+
+            if (crore > 0) str += numberToWords(crore) + ' Crore ';
+            if (lakh > 0) str += numberToWords(lakh) + ' Lakh ';
+            if (thousand > 0) str += numberToWords(thousand) + ' Thousand ';
+            if (hundred > 0) str += ones[hundred] + ' Hundred ';
+            if (num > 0) {
+                if (str !== '') str += ' ';
+                if (num < 10) str += ones[num];
+                else if (num < 20) str += teens[num - 10];
+                else str += tens[Math.floor(num / 10)] + (num % 10 > 0 ? ' ' + ones[num % 10] : '');
+            }
+
+            return str.trim();
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            const day = date.getDate();
+            const month = date.toLocaleString('default', { month: 'long' });
+            const year = date.getFullYear();
+            const suffix = (day % 10 === 1 && day !== 11) ? 'st' : (day % 10 === 2 && day !== 12) ? 'nd' : (day % 10 === 3 && day !== 13) ? 'rd' : 'th';
+            return `${day}${suffix} of ${month}, ${year}`;
+        }
+
+        function updateWords() {
+            const loanAmount = document.getElementById('loanAmount').value || '';
+            document.getElementById('loanWords').value = loanAmount ? numberToWords(loanAmount) + ' Rupees Only' : '';
+
+            const outstandingAmount = document.getElementById('outstandingAmount').value || '';
+            document.getElementById('outstandingWords').value = outstandingAmount ? numberToWords(outstandingAmount) + ' Only' : '';
+
+            const settlementAmount = document.getElementById('settlementAmount').value || '';
+            document.getElementById('settlementWords').value = settlementAmount ? numberToWords(settlementAmount) + ' Only' : '';
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+
+        // Helper to draw wrapped text and return height
+        async function drawWrappedText(page, text, x, y, font, size, maxWidth, lineHeight) {
+            const words = text.split(' ');
+            let line = '';
+            let currentY = y;
+            let totalHeight = lineHeight;
+            for (let word of words) {
+                const testLine = line + word + ' ';
+                const width = font.widthOfTextAtSize(testLine, size);
+                if (width > maxWidth && line !== '') {
+                    page.drawText(line.trim(), { x, y: currentY, size, font });
+                    line = word + ' ';
+                    currentY -= lineHeight;
+                    totalHeight += lineHeight;
+                } else {
+                    line = testLine;
+                }
+            }
+            if (line) {
+                page.drawText(line.trim(), { x, y: currentY, size, font });
+            }
+            return totalHeight;
+        }
+
+        // Create the PDF
+        async function createFilledPDF() {
+            showLoading(true);
+            try {
+                const { PDFDocument, StandardFonts, rgb } = PDFLib;
+                const pdfDoc = await PDFDocument.create();
+                const page1 = pdfDoc.addPage([595, 842]); // A4
+                const page2 = pdfDoc.addPage([595, 842]);
+                const font = await pdfDoc.embedFont(StandardFonts.TimesRoman);
+                const boldFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
+                const fontSize = 10;
+                const bodyFontSize = 11;
+                const lineHeight = bodyFontSize * 1.2;
+                const leftMargin = 72; // 1 inch = 72 points
+                const maxWidth = 595 - leftMargin * 2;
+                let currentY = 842 - 72; // Top margin 1 inch
+
+                // Data from form
+                const data = {
+                    refNo: document.getElementById('refNo').value || '',
+                    offerDate: formatDate(document.getElementById('offerDate').value),
+                    branch: document.getElementById('branch').value || 'Bandhan BU',
+                    loanAcNo: document.getElementById('loanAcNo').value || '12345678000',
+                    loanAmount: document.getElementById('loanAmount').value || '00000',
+                    loanWords: document.getElementById('loanWords').value,
+                    outstandingAmount: document.getElementById('outstandingAmount').value || '00000',
+                    outstandingWords: document.getElementById('outstandingWords').value,
+                    outstandingAsOn: formatDate(document.getElementById('outstandingAsOn').value),
+                    settlementAmount: document.getElementById('settlementAmount').value || '00000',
+                    settlementWords: document.getElementById('settlementWords').value,
+                    validTill: formatDate(document.getElementById('validTill').value),
+                    signatory: document.getElementById('signatory').value || '',
+                    paymentRows: Array.from(document.querySelectorAll('#paymentTable tbody tr')).map(row => ({
+                        slNo: row.cells[0].textContent,
+                        date: row.querySelector('.paymentDate').value,
+                        mode: row.querySelector('.paymentMode').value,
+                        amount: row.querySelector('.paymentAmount').value
+                    })).filter(row => row.date && row.amount) // Filter filled rows
+                };
+
+                // Page 1 Header
+                const titleWidth = boldFont.widthOfTextAtSize('SETTLEMENT OFFER', fontSize + 2);
+                page1.drawText('SETTLEMENT OFFER', { x: (595 - titleWidth) / 2, y: currentY, size: fontSize + 2, font: boldFont });
+                page1.drawLine({ start: { x: (595 - titleWidth) / 2, y: currentY - 3 }, end: { x: (595 + titleWidth) / 2, y: currentY - 3 }, thickness: 1, color: rgb(0, 0, 0) });
+                currentY -= lineHeight * 6; // Increased space by 4 additional line heights
+
+                page1.drawText(`Ref. No: ${data.refNo}`, { x: leftMargin, y: currentY, size: fontSize, font });
+                currentY -= lineHeight;
+
+                page1.drawText(`DATE: ${data.offerDate}`, { x: 595 - leftMargin - font.widthOfTextAtSize(`DATE: ${data.offerDate}`, fontSize), y: currentY, size: fontSize, font });
+                currentY -= lineHeight * 2;
+
+                // To section
+                page1.drawText('To', { x: leftMargin, y: currentY, size: fontSize, font });
+                currentY -= lineHeight;
+                page1.drawText('The BUM', { x: leftMargin, y: currentY, size: fontSize, font });
+                currentY -= lineHeight;
+                page1.drawText(data.branch, { x: leftMargin, y: currentY, size: fontSize, font });
+                currentY -= lineHeight;
+                page1.drawText('Bandhan Bank', { x: leftMargin, y: currentY, size: fontSize, font });
+                currentY -= lineHeight * 2;
+
+                // Re and Sub
+                page1.drawText(`Re: Loan A/C No: ${data.loanAcNo}`, { x: leftMargin, y: currentY, size: fontSize, font });
+                currentY -= lineHeight;
+                page1.drawText('Sub: Settlement Offer.', { x: leftMargin, y: currentY, size: fontSize, font });
+                currentY -= lineHeight * 2;
+
+                // Dear Sir/Madam
+                page1.drawText('Dear Sir/Madam', { x: leftMargin, y: currentY, size: bodyFontSize, font });
+                currentY -= lineHeight;
+
+                // Body paragraphs
+                let para1 = `This is in reference to the loan agreement in connection with the captioned loan account executed by you with Bandhan Bank Limited (hereinafter referred to as the "Bank") for availing the Loan for an amount of Rs ${data.loanAmount}/- (${data.loanWords}). The specific condition for sanctioning the said facility was to make a timely payment, and the said loan was granted to you on the understanding that you would make the payment in the manner and within the time stipulated in the agreement.`;
+                currentY -= await drawWrappedText(page1, para1, leftMargin, currentY, font, bodyFontSize, maxWidth, lineHeight) + lineHeight;
+
+                let para2 = `You have approached the bank and offered to settle your aforesaid account, and as per our mutual discussions, we understand that you are ready to pay an amount of Rupees ${data.settlementAmount}/- (${data.settlementWords}) towards full & final payment against the amount of Rupees ${data.outstandingAmount}/- (${data.outstandingWords}) outstanding as on ${data.outstandingAsOn}.`;
+                currentY -= await drawWrappedText(page1, para2, leftMargin, currentY, font, bodyFontSize, maxWidth, lineHeight) + lineHeight;
+
+                let para3 = `In the circumstances, trusting upon the commitment/s made by you, the bank in good faith and gesture, has agreed to accept an amount of Rupees ${data.settlementAmount}/- (${data.settlementWords}) as full and final settlement of the captioned account provided that the same is paid strictly as per the below mentioned schedule.`;
+                currentY -= await drawWrappedText(page1, para3, leftMargin, currentY, font, bodyFontSize, maxWidth, lineHeight) + lineHeight * 2;
+
+                // Payment Table with borders
+                const tableTopY = currentY;
+                const colWidths = [32, 120, 120, 150]; // SL No increased by 2 points
+                const rowHeight = lineHeight * 1.5;
+                const tableWidth = colWidths.reduce((a, b) => a + b, 0);
+                const tableHeight = rowHeight * (data.paymentRows.length + 1); // Header + rows
+
+                // Draw table borders
+                // Outer border
+                page1.drawRectangle({ x: leftMargin, y: currentY - tableHeight, width: tableWidth, height: tableHeight, borderColor: rgb(0, 0, 0), borderWidth: 1 });
+                // Horizontal lines
+                let yLine = currentY - rowHeight;
+                for (let i = 0; i < data.paymentRows.length; i++) {
+                    page1.drawLine({ start: { x: leftMargin, y: yLine }, end: { x: leftMargin + tableWidth, y: yLine }, thickness: 1, color: rgb(0, 0, 0) });
+                    yLine -= rowHeight;
+                }
+                // Vertical lines
+                let xLine = leftMargin + colWidths[0];
+                for (let i = 0; i < 3; i++) {
+                    page1.drawLine({ start: { x: xLine, y: currentY }, end: { x: xLine, y: currentY - tableHeight }, thickness: 1, color: rgb(0, 0, 0) });
+                    xLine += colWidths[i + 1];
+                }
+
+                // Headers - centered
+                let headerTexts = ['SL No', 'Date (On or Before)', 'Mode of Payment', 'Amount (In rupees)'];
+                let colStart = leftMargin;
+                headerTexts.forEach((text, i) => {
+                    const textWidth = boldFont.widthOfTextAtSize(text, fontSize);
+                    page1.drawText(text, { x: colStart + (colWidths[i] - textWidth) / 2, y: currentY - fontSize - 2, size: fontSize, font: boldFont });
+                    colStart += colWidths[i];
+                });
+                currentY -= rowHeight;
+
+                // Rows - centered
+                data.paymentRows.forEach(row => {
+                    let rowTexts = [row.slNo, row.date, row.mode, row.amount + '/-'];
+                    colStart = leftMargin;
+                    rowTexts.forEach((text, i) => {
+                        const textWidth = font.widthOfTextAtSize(text, fontSize);
+                        page1.drawText(text, { x: colStart + (colWidths[i] - textWidth) / 2, y: currentY - fontSize - 2, size: fontSize, font });
+                        colStart += colWidths[i];
+                    });
+                    currentY -= rowHeight;
+                });
+
+                currentY -= lineHeight * 2; // Standard gap after table
+
+                let para4 = `In case of any default in the payment schedule mentioned above or payments are made after the due date for whatever reason, the amount deposited by you under the instant settlement, shall be considered as deposit towards the total outstanding as mentioned in this letter, and the settlement offer shall be declared null, void and withdrawn. Further, all the concessions granted shall also stand as withdrawn without any further intimation.`;
+                currentY -= await drawWrappedText(page1, para4, leftMargin, currentY, font, bodyFontSize, maxWidth, lineHeight) + lineHeight;
+
+                let para5 = `Please also note that for non-compliance with the terms of payment mentioned above, the Settlement plan would be treated as automatically cancelled, and the bank reserves it's right to redebit your a/c and initiate and/or continue legal proceedings without any further notice for recoveries of the balance outstanding with interest and other charges. Therefore, the bank will restore the original liability, and you will be liable to pay the total dues.`;
+                currentY -= await drawWrappedText(page1, para5, leftMargin, currentY, font, bodyFontSize, maxWidth, lineHeight) + lineHeight;
+
+                // Page 1 footer
+                page1.drawText('Page 1 of 2', { x: leftMargin, y: 30, size: 9, font });
+
+                // Page 2
+                let currentY2 = 842 - 72;
+
+                let para6 = `It is hereby agreed that after realization of the aforesaid settlement amount in full within the stipulated date, the bank shall take necessary steps to close your loan account and withdrawal of any pending litigation filed by the bank against you pertaining to the said loan account.`;
+                currentY2 -= await drawWrappedText(page2, para6, leftMargin, currentY2, font, bodyFontSize, maxWidth, lineHeight) + lineHeight;
+
+                let para7 = `Further, in consideration of the Settlement plan with respect to the above-mentioned loan account, you confirm that any claims, grievances and/or case/s you have or may assert against the bank that pertains to the said loan account, shall be withdrawn or relinquished.`;
+                currentY2 -= await drawWrappedText(page2, para7, leftMargin, currentY2, font, bodyFontSize, maxWidth, lineHeight) + lineHeight;
+
+                let para8 = `This one-time settlement offer is valid till ${data.validTill} and supersede earlier settlement offer, if any and shall not set any precedent.`;
+                currentY2 -= await drawWrappedText(page2, para8, leftMargin, currentY2, font, bodyFontSize, maxWidth, lineHeight) + lineHeight;
+
+                let para9 = `This Settlement is, however without prejudice to other rights and contentions of the bank. Please send us signed copy of this letter as a token of acceptance and acknowledgement.`;
+                currentY2 -= await drawWrappedText(page2, para9, leftMargin, currentY2, font, bodyFontSize, maxWidth, lineHeight) + lineHeight * 2;
+
+                // Signatures with increased space
+                page2.drawText('For Bandhan Bank Ltd.', { x: leftMargin, y: currentY2, size: fontSize, font });
+                page2.drawText('Accepted by', { x: 595 - leftMargin - font.widthOfTextAtSize('Accepted by', fontSize), y: currentY2, size: fontSize, font });
+                currentY2 -= lineHeight * 5; // Increased space
+
+                page2.drawText(data.signatory, { x: leftMargin, y: currentY2, size: fontSize, font });
+                page2.drawText('(Signature/s of Borrower/s)', { x: 595 - leftMargin - font.widthOfTextAtSize('(Signature/s of Borrower/s)', fontSize), y: currentY2, size: fontSize, font });
+                currentY2 -= lineHeight * 3; // Increased space
+
+                page2.drawText('Authorised Signatory', { x: leftMargin, y: currentY2, size: fontSize, font });
+
+                // End of Document at the last line
+                page2.drawText('***End of Document***', { x: (595 - font.widthOfTextAtSize('***End of Document***', fontSize)) / 2, y: 20, size: fontSize, font });
+
+                // Page 2 footer
+                page2.drawText('Page 2 of 2', { x: leftMargin, y: 10, size: 9, font });
+
+                return await pdfDoc.save();
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Generate PDF for download
+        async function generatePDF() {
+            try {
+                const pdfBytes = await createFilledPDF();
+                const fileName = `${document.getElementById('branch').value || 'Bandhan BU'}_offer_letter.pdf`;
+                download(pdfBytes, fileName, 'application/pdf');
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        // Print PDF
+        async function printPDF() {
+            try {
+                const pdfBytes = await createFilledPDF();
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                const printWindow = window.open(url);
+                printWindow.addEventListener('load', () => printWindow.print());
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        function download(data, fileName, mimeType) {
+            const blob = new Blob([data], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = fileName;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function resetForm() {
+            document.getElementById('letterForm').reset();
+            const today = new Date('2025-10-15').toISOString().split('T')[0];
+            document.getElementById('offerDate').value = today;
+            document.getElementById('outstandingAsOn').value = today;
+            document.getElementById('validTill').value = today;
+            document.getElementById('loanAmount').value = '';
+            document.getElementById('outstandingAmount').value = '';
+            document.getElementById('settlementAmount').value = '';
+            updateWords();
+        }
+
+        // Initialize with real-time update
+        window.onload = () => {
+            resetForm();
+            ['loanAmount', 'outstandingAmount', 'settlementAmount'].forEach(id => {
+                document.getElementById(id).addEventListener('input', updateWords);
+            });
+        };
+    </script>
+</body>
+</html>

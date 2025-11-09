@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Overdue Notice Letter Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 10px;
+            max-width: 600px;
+            margin: auto;
+            position: relative;
+            background: #f9f9f9;
+        }
+        .greeting {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #1a73e8;
+            margin-bottom: 10px;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            display: block;
+            margin: 12px 0 5px;
+            font-weight: bold;
+            color: #444;
+        }
+        input[type="text"], input[type="date"], textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        textarea {
+            height: 80px;
+            resize: vertical;
+        }
+        button {
+            padding: 12px;
+            color: white;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+        #generateBtn, #printBtn {
+            width: 48%;
+        }
+        #generateBtn {
+            background-color: #4CAF50;
+        }
+        #generateBtn:hover:not(:disabled) {
+            background-color: #45a049;
+        }
+        #printBtn {
+            background-color: #2196F3;
+        }
+        #printBtn:hover:not(:disabled) {
+            background-color: #1e87db;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #resetBtn {
+            width: 120px;
+            background-color: #f44336;
+            margin: 15px auto 0;
+            display: block;
+        }
+        #resetBtn:hover:not(:disabled) {
+            background-color: #da190b;
+        }
+        #loading {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px 30px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            z-index: 1000;
+        }
+        .input-with-symbol {
+            position: relative;
+        }
+        .input-with-symbol::before {
+            content: 'Rs ';
+            position: absolute;
+            left: 12px;
+            top: 10px;
+            font-weight: bold;
+            color: #555;
+        }
+        .input-with-symbol input {
+            padding-left: 35px;
+        }
+        .readonly {
+            background-color: #f0f0f0;
+            cursor: not-allowed;
+        }
+        .developer-info {
+            text-align: center;
+            font-size: 12px;
+            margin-top: 25px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="greeting" id="greeting"></div>
+    <h2>Overdue Notice Letter Generator</h2>
+
+    <form id="letterForm">
+        <label>BU Name:</label>
+        <input type="text" id="buName" placeholder="Omuk BU">
+
+        <label>BU Address:</label>
+        <textarea id="buAddress" placeholder="Enter full BU address (line breaks allowed)"></textarea>
+
+        <label>Customer Name:</label>
+        <input type="text" id="customerName" placeholder="Gabbar Singh">
+
+        <label>Customer Address:</label>
+        <textarea id="customerAddress" placeholder="Enter full address (line breaks allowed)"></textarea>
+
+        <label>Loan A/C No:</label>
+        <input type="text" id="loanAcNo" placeholder="1234567890">
+
+        <label>Overdue Amount:</label>
+        <div class="input-with-symbol">
+            <input type="text" id="overdueAmount" placeholder="Enter overdue amount" oninput="updateWords()">
+        </div>
+
+        <label>Overdue Amount in Words:</label>
+        <input type="text" id="overdueWords" readonly class="readonly">
+
+        <label>Overdue As On Date:</label>
+        <input type="date" id="overdueAsOn" readonly>
+
+        <label>Authorised Signatory:</label>
+        <input type="text" id="signatory" placeholder="Enter signatory name">
+
+        <div class="button-container">
+            <button type="button" id="generateBtn" onclick="generatePDF()">Generate PDF</button>
+            <button type="button" id="printBtn" onclick="printPDF()">Print PDF</button>
+        </div>
+        <button type="button" id="resetBtn" onclick="resetForm()">Reset Form</button>
+    </form>
+
+    <div id="loading">Generating PDF...</div>
+
+    <div class="developer-info">
+        Developed by <a href="https://www.linkedin.com/in/mrinal-kumar-dey" target="_blank">Mrinal Kumar</a>
+    </div>
+
+    <script src="https://unpkg.com/pdf-lib@1.17.0/dist/pdf-lib.min.js"></script>
+    <script>
+        // Dynamic Greeting
+        function updateGreeting() {
+            const hour = new Date().getHours();
+            let greeting = '';
+            if (hour < 12) greeting = 'Good Morning!';
+            else if (hour < 17) greeting = 'Good Afternoon!';
+            else greeting = 'Good Evening!';
+            document.getElementById('greeting').textContent = greeting;
+        }
+
+        // Number to Words
+        function numberToWords(num) {
+            const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+            const tens = ['', 'Ten', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+            const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+
+            if (!num || isNaN(num)) return '';
+            num = parseFloat(num).toString().replace(/\..*/g, '');
+            if (num === '0') return 'Zero';
+
+            let str = '';
+            let crore = Math.floor(num / 10000000);
+            num %= 10000000;
+            let lakh = Math.floor(num / 100000);
+            num %= 100000;
+            let thousand = Math.floor(num / 1000);
+            num %= 1000;
+            let hundred = Math.floor(num / 100);
+            num %= 100;
+
+            if (crore > 0) str += numberToWords(crore) + ' Crore ';
+            if (lakh > 0) str += numberToWords(lakh) + ' Lakh ';
+            if (thousand > 0) str += numberToWords(thousand) + ' Thousand ';
+            if (hundred > 0) str += ones[hundred] + ' Hundred ';
+            if (num > 0) {
+                if (str !== '') str += 'and ';
+                if (num < 10) str += ones[num];
+                else if (num < 20) str += teens[num - 10];
+                else str += tens[Math.floor(num / 10)] + (num % 10 > 0 ? ' ' + ones[num % 10] : '');
+            }
+            return str.trim();
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            const day = date.getDate();
+            const month = date.toLocaleString('default', { month: 'long' });
+            const year = date.getFullYear();
+            const suffix = (day % 10 === 1 && day !== 11) ? 'st' : (day % 10 === 2 && day !== 12) ? 'nd' : (day % 10 === 3 && day !== 13) ? 'rd' : 'th';
+            return `${day}${suffix} ${month}, ${year}`;
+        }
+
+        function updateWords() {
+            const amount = document.getElementById('overdueAmount').value || '';
+            document.getElementById('overdueWords').value = amount ? numberToWords(amount) + ' Only' : '';
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+
+        async function drawWrappedText(page, text, x, y, font, size, maxWidth, lineHeight) {
+            const words = text.split(' ');
+            let line = '';
+            let currentY = y;
+            let totalHeight = lineHeight;
+            for (let word of words) {
+                const testLine = line + word + ' ';
+                const width = font.widthOfTextAtSize(testLine, size);
+                if (width > maxWidth && line !== '') {
+                    page.drawText(line.trim(), { x, y: currentY, size, font });
+                    line = word + ' ';
+                    currentY -= lineHeight;
+                    totalHeight += lineHeight;
+                } else {
+                    line = testLine;
+                }
+            }
+            if (line) page.drawText(line.trim(), { x, y: currentY, size, font });
+            return totalHeight;
+        }
+
+        async function createFilledPDF() {
+            showLoading(true);
+            try {
+                const { PDFDocument, StandardFonts, rgb } = PDFLib;
+                const pdfDoc = await PDFDocument.create();
+                const page = pdfDoc.addPage([595, 842]);
+                const font = await pdfDoc.embedFont(StandardFonts.TimesRoman);
+                const boldFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
+                const fontSize = 11;
+                const lineHeight = fontSize * 1.3;
+                const leftMargin = 72;
+                const maxWidth = 595 - leftMargin * 2;
+                let currentY = 842 - 72;
+
+                const data = {
+                    buName: document.getElementById('buName').value.trim() || 'Omuk BU',
+                    buAddress: document.getElementById('buAddress').value.trim() || 'Address Line 1\nAddress Line 2\nPIN',
+                    customerName: document.getElementById('customerName').value.trim() || 'Gabbar Singh',
+                    customerAddress: document.getElementById('customerAddress').value.trim() || 'Address Line 1\nAddress Line 2\nPIN',
+                    loanAcNo: document.getElementById('loanAcNo').value.trim() || '1234567890',
+                    overdueAmount: document.getElementById('overdueAmount').value.trim() || '0',
+                    overdueWords: document.getElementById('overdueWords').value,
+                    overdueAsOn: formatDate(document.getElementById('overdueAsOn').value),
+                    signatory: document.getElementById('signatory').value.trim() || 'Authorised signatory'
+                };
+
+                // Header
+                page.drawText('Bandhan Bank', { x: leftMargin, y: currentY, size: fontSize + 2, font: boldFont });
+                currentY -= lineHeight;
+                page.drawText(data.buName, { x: leftMargin, y: currentY, size: fontSize, font: boldFont });
+                currentY -= lineHeight;
+
+                const buAddrLines = data.buAddress.split('\n');
+                for (let line of buAddrLines) {
+                    page.drawText(line.trim(), { x: leftMargin, y: currentY, size: fontSize, font });
+                    currentY -= lineHeight;
+                }
+                currentY -= lineHeight * 2;
+
+                // Separator Line
+                page.drawLine({ start: { x: leftMargin, y: currentY }, end: { x: 595 - leftMargin, y: currentY }, thickness: 1, color: rgb(0, 0, 0) });
+                currentY -= lineHeight * 2;
+
+                // To
+                page.drawText('To', { x: leftMargin, y: currentY, size: fontSize, font });
+                currentY -= lineHeight;
+                page.drawText(data.customerName, { x: leftMargin, y: currentY, size: fontSize, font });
+                currentY -= lineHeight;
+
+                const custAddrLines = data.customerAddress.split('\n');
+                for (let line of custAddrLines) {
+                    page.drawText(line.trim(), { x: leftMargin, y: currentY, size: fontSize, font });
+                    currentY -= lineHeight;
+                }
+                currentY -= lineHeight * 2;
+
+                // Body - Updated with Loan A/C No
+                const para1 = `It is for your kind information that your Sahayata Loan, Loan a/c no- ${data.loanAcNo}, with Bandhan Bank, ${data.buName} is overdue despite multiple conveyed communication from our end. As outlined in our previous communication, you have an overdue amount of Rs ${data.overdueAmount} (${data.overdueWords}) as of ${data.overdueAsOn}. We strongly encourage you to clear your due to avoid further penalty and adverse credit reporting to various CICs.`;
+                currentY -= await drawWrappedText(page, para1, leftMargin, currentY, font, fontSize, maxWidth, lineHeight) + lineHeight * 2;
+
+                const para2 = `We value our customer and would prefer to resolve this amicably. However, we must also ensure financial obligations are met in accordance with agreed terms. Your understanding and goodwill are highly solicited.`;
+                currentY -= await drawWrappedText(page, para2, leftMargin, currentY, font, fontSize, maxWidth, lineHeight) + lineHeight * 2;
+
+                // Signatory
+                page.drawText(data.signatory, { x: leftMargin, y: currentY, size: fontSize, font });
+                currentY -= lineHeight;
+                page.drawText(data.buName, { x: leftMargin, y: currentY, size: fontSize, font: boldFont });
+
+                return await pdfDoc.save();
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function generatePDF() {
+            try {
+                const pdfBytes = await createFilledPDF();
+                const fileName = `${document.getElementById('buName').value.trim() || 'Omuk_BU'}_overdue_notice.pdf`;
+                download(pdfBytes, fileName, 'application/pdf');
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function printPDF() {
+            try {
+                const pdfBytes = await createFilledPDF();
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                const printWindow = window.open(url);
+                printWindow.addEventListener('load', () => printWindow.print());
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        function download(data, fileName, mimeType) {
+            const blob = new Blob([data], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = fileName;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function resetForm() {
+            document.getElementById('letterForm').reset();
+            document.getElementById('overdueAsOn').value = new Date().toISOString().split('T')[0];
+            updateWords();
+        }
+
+        window.onload = () => {
+            updateGreeting();
+            resetForm();
+            document.getElementById('overdueAmount').addEventListener('input', updateWords);
+        };
+    </script>
+</body>
+</html>
