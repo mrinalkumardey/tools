@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Create Users</title>
+    <title>Login - BU Tool Dashboard</title>
     <style>
         * {
             margin: 0;
@@ -21,27 +21,27 @@
             padding: 20px;
         }
 
-        .admin-container {
+        .login-container {
             background: white;
             border-radius: 20px;
             box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
             padding: 50px 40px;
             width: 100%;
-            max-width: 500px;
+            max-width: 420px;
         }
 
-        .admin-header {
+        .login-header {
             text-align: center;
             margin-bottom: 40px;
         }
 
-        .admin-header h1 {
+        .login-header h1 {
             font-size: 2rem;
             color: #333;
             margin-bottom: 10px;
         }
 
-        .admin-header p {
+        .login-header p {
             color: #666;
             font-size: 0.95rem;
         }
@@ -72,7 +72,7 @@
             border-color: #667eea;
         }
 
-        .create-btn {
+        .login-btn {
             width: 100%;
             padding: 14px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -86,40 +86,23 @@
             margin-top: 10px;
         }
 
-        .create-btn:hover {
+        .login-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
         }
 
-        .create-btn:active {
+        .login-btn:active {
             transform: translateY(0);
         }
 
-        .create-btn:disabled {
+        .login-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
         }
 
-        .back-btn {
-            width: 100%;
-            padding: 14px;
-            background: white;
-            color: #667eea;
-            border: 2px solid #667eea;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            margin-top: 15px;
-        }
-
-        .back-btn:hover {
-            background: #667eea;
-            color: white;
-        }
-
-        .message {
+        .error-message {
+            background: #fee;
+            color: #c33;
             padding: 12px;
             border-radius: 8px;
             margin-bottom: 20px;
@@ -127,82 +110,50 @@
             display: none;
         }
 
-        .message.show {
+        .error-message.show {
             display: block;
         }
 
-        .message.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .message.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .info-box {
-            background: #e7f3ff;
-            border-left: 4px solid #2196F3;
-            padding: 15px;
-            margin-bottom: 25px;
-            border-radius: 5px;
-        }
-
-        .info-box p {
-            color: #0c5393;
-            font-size: 0.9rem;
-            line-height: 1.6;
-        }
-
-        .password-note {
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #999;
             font-size: 0.85rem;
-            color: #666;
-            margin-top: 5px;
         }
     </style>
 </head>
 <body>
-    <div class="admin-container">
-        <div class="admin-header">
-            <h1>🔑 Create New User</h1>
-            <p>Add users to BU Tool Dashboard</p>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>🔐 BU Tool Dashboard</h1>
+            <p>Sign in to access your tools</p>
         </div>
 
-        <div class="info-box">
-            <p><strong>Important:</strong> This page allows you to create new user accounts. The user will receive their login credentials and can sign in using the provided email and password.</p>
-        </div>
+        <div id="errorMessage" class="error-message"></div>
 
-        <div id="message" class="message"></div>
-
-        <form id="createUserForm">
+        <form id="loginForm">
             <div class="form-group">
-                <label for="email">User Email Address</label>
-                <input type="email" id="email" placeholder="user@example.com" required>
+                <label for="email">Email Address</label>
+                <input type="email" id="email" placeholder="your.email@example.com" required autocomplete="username">
             </div>
 
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" placeholder="Minimum 6 characters" required minlength="6">
-                <div class="password-note">Password must be at least 6 characters long</div>
+                <input type="password" id="password" placeholder="Enter your password" required autocomplete="current-password">
             </div>
 
-            <div class="form-group">
-                <label for="confirmPassword">Confirm Password</label>
-                <input type="password" id="confirmPassword" placeholder="Re-enter password" required minlength="6">
-            </div>
-
-            <button type="submit" class="create-btn" id="createBtn">Create User Account</button>
-            <button type="button" class="back-btn" onclick="window.location.href='dashboard.html'">Back to Dashboard</button>
+            <button type="submit" class="login-btn" id="loginBtn">Sign In</button>
         </form>
+
+        <div class="footer">
+            <p>Developed by <a href="https://www.linkedin.com/in/mrinal-kumar-dey" target="_blank" style="color: #667eea; text-decoration: none;">Mrinal Kumar</a></p>
+        </div>
     </div>
 
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB6LOUAmiHidHdAQB2WzTLR4cq7cs6h720",
@@ -216,82 +167,47 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        const createUserForm = document.getElementById('createUserForm');
-        const message = document.getElementById('message');
-        const createBtn = document.getElementById('createBtn');
+        // Set persistence
+        setPersistence(auth, browserLocalPersistence);
 
-        // Check if admin is logged in
-        onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                window.location.href = 'login.html';
-            }
-        });
+        const loginForm = document.getElementById('loginForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const loginBtn = document.getElementById('loginBtn');
 
-        function showMessage(text, type) {
-            message.textContent = text;
-            message.className = `message show ${type}`;
-            setTimeout(() => {
-                message.classList.remove('show');
-            }, 5000);
-        }
-
-        createUserForm.addEventListener('submit', async (e) => {
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const email = document.getElementById('email').value;
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
 
-            // Validation
-            if (password !== confirmPassword) {
-                showMessage('Passwords do not match!', 'error');
-                return;
-            }
-
-            if (password.length < 6) {
-                showMessage('Password must be at least 6 characters long!', 'error');
-                return;
-            }
-
-            message.classList.remove('show');
-            createBtn.disabled = true;
-            createBtn.textContent = 'Creating account...';
+            errorMessage.classList.remove('show');
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Signing in...';
 
             try {
-                // Note: This will sign in the newly created user automatically
-                // We'll need to sign back in as admin after
-                const currentUser = auth.currentUser;
-                
-                await createUserWithEmailAndPassword(auth, email, password);
-                
-                showMessage(`✓ Account created successfully for ${email}`, 'success');
-                
-                // Clear form
-                createUserForm.reset();
-                
-                createBtn.disabled = false;
-                createBtn.textContent = 'Create User Account';
-
-                // Show credentials
-                setTimeout(() => {
-                    alert(`User created successfully!\n\nEmail: ${email}\nPassword: ${password}\n\nPlease share these credentials with the user securely.`);
-                }, 500);
-
+                await signInWithEmailAndPassword(auth, email, password);
+                // On success, redirect to dashboard
+                window.location.href = 'dashboard.html';
             } catch (error) {
-                console.error('Create user error:', error);
+                console.error('Login error:', error);
                 
-                let errorMsg = 'Failed to create user account.';
-                if (error.code === 'auth/email-already-in-use') {
-                    errorMsg = 'This email is already registered.';
+                let message = 'Failed to sign in. Please check your credentials.';
+                if (error.code === 'auth/user-not-found') {
+                    message = 'No account found with this email.';
+                } else if (error.code === 'auth/wrong-password') {
+                    message = 'Incorrect password.';
                 } else if (error.code === 'auth/invalid-email') {
-                    errorMsg = 'Invalid email address.';
-                } else if (error.code === 'auth/weak-password') {
-                    errorMsg = 'Password is too weak. Use at least 6 characters.';
+                    message = 'Invalid email address.';
+                } else if (error.code === 'auth/too-many-requests') {
+                    message = 'Too many failed attempts. Please try again later.';
+                } else if (error.code === 'auth/invalid-credential') {
+                    message = 'Invalid email or password.';
                 }
                 
-                showMessage(errorMsg, 'error');
-                createBtn.disabled = false;
-                createBtn.textContent = 'Create User Account';
+                errorMessage.textContent = message;
+                errorMessage.classList.add('show');
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Sign In';
             }
         });
     </script>

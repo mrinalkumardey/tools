@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Create Users</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .admin-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+            padding: 50px 40px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .admin-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .admin-header h1 {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .admin-header p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .create-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        .create-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .create-btn:active {
+            transform: translateY(0);
+        }
+
+        .create-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .back-btn {
+            width: 100%;
+            padding: 14px;
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 15px;
+        }
+
+        .back-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .info-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 5px;
+        }
+
+        .info-box p {
+            color: #856404;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .password-note {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div id="loading" class="loading">
+            <p>Loading...</p>
+        </div>
+
+        <div id="content">
+            <div class="admin-header">
+                <h1>🔑 Create New User</h1>
+                <p>Add users to BU Tool Dashboard</p>
+            </div>
+
+            <div class="info-box">
+                <p><strong>⚠️ Important Note:</strong> Due to Firebase limitations with client-side user creation, you'll need to manually create user accounts in the Firebase Console. This page will guide you through the process.</p>
+            </div>
+
+            <div id="message" class="message"></div>
+
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                <h3 style="color: #333; margin-bottom: 15px; font-size: 1.1rem;">📝 How to Create Users:</h3>
+                <ol style="color: #555; line-height: 2; padding-left: 20px;">
+                    <li>Go to <a href="https://console.firebase.google.com" target="_blank" style="color: #667eea; text-decoration: none; font-weight: 600;">Firebase Console</a></li>
+                    <li>Select your project: <strong>bu-tools-dashboard</strong></li>
+                    <li>Navigate to <strong>Authentication</strong> → <strong>Users</strong> tab</li>
+                    <li>Click <strong>"Add user"</strong> button</li>
+                    <li>Enter the user's email and password (min 6 characters)</li>
+                    <li>Click <strong>"Add user"</strong></li>
+                    <li>Share the credentials with the user securely</li>
+                </ol>
+            </div>
+
+            <div style="background: #e7f3ff; padding: 15px; border-radius: 8px; border-left: 4px solid #2196F3;">
+                <p style="color: #0c5393; font-size: 0.9rem; line-height: 1.6;">
+                    <strong>💡 Tip:</strong> Save this page as a bookmark for quick access to user creation instructions!
+                </p>
+            </div>
+
+            <button type="button" class="back-btn" onclick="window.location.href='dashboard.html'" style="margin-top: 25px;">Back to Dashboard</button>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB6LOUAmiHidHdAQB2WzTLR4cq7cs6h720",
+            authDomain: "bu-tools-dashboard.firebaseapp.com",
+            projectId: "bu-tools-dashboard",
+            storageBucket: "bu-tools-dashboard.firebasestorage.app",
+            messagingSenderId: "856733218195",
+            appId: "1:856733218195:web:3bf4794d70ecd04eb3a466"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        const loading = document.getElementById('loading');
+        const content = document.getElementById('content');
+
+        // Check if admin is logged in
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            } else {
+                loading.style.display = 'none';
+                content.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
