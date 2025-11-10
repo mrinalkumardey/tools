@@ -134,16 +134,23 @@
         <form id="loginForm">
             <div class="form-group">
                 <label for="email">Email Address</label>
-                <input type="email" id="email" placeholder="your.email@example.com" required>
+                <input type="email" id="email" placeholder="your.email@example.com" required autocomplete="username">
             </div>
 
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" placeholder="Enter your password" required>
+                <input type="password" id="password" placeholder="Enter your password" required autocomplete="current-password">
             </div>
 
             <button type="submit" class="login-btn" id="loginBtn">Sign In</button>
         </form>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="mailto:mrinalkumardey@zohomail.in?subject=Access Request for BU Tool Dashboard&body=Hello,%0D%0A%0D%0AI would like to request access to the BU Tool Dashboard.%0D%0A%0D%0AName: %0D%0AEmail: %0D%0ADepartment: %0D%0A%0D%0AThank you." 
+               style="color: #667eea; text-decoration: none; font-size: 0.9rem; font-weight: 600;">
+                Request Access?
+            </a>
+        </div>
 
         <div class="footer">
             <p>Developed by <a href="https://www.linkedin.com/in/mrinal-kumar-dey" target="_blank" style="color: #667eea; text-decoration: none;">Mrinal Kumar</a></p>
@@ -153,7 +160,7 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB6LOUAmiHidHdAQB2WzTLR4cq7cs6h720",
@@ -167,12 +174,8 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        // Check if user is already logged in
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                window.location.href = 'dashboard.html';
-            }
-        });
+        // Set persistence
+        setPersistence(auth, browserLocalPersistence);
 
         const loginForm = document.getElementById('loginForm');
         const errorMessage = document.getElementById('errorMessage');
@@ -181,7 +184,7 @@
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const email = document.getElementById('email').value;
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
 
             errorMessage.classList.remove('show');
@@ -190,7 +193,8 @@
 
             try {
                 await signInWithEmailAndPassword(auth, email, password);
-                // Redirect happens automatically via onAuthStateChanged
+                // On success, redirect to dashboard
+                window.location.href = 'dashboard.html';
             } catch (error) {
                 console.error('Login error:', error);
                 
@@ -203,6 +207,8 @@
                     message = 'Invalid email address.';
                 } else if (error.code === 'auth/too-many-requests') {
                     message = 'Too many failed attempts. Please try again later.';
+                } else if (error.code === 'auth/invalid-credential') {
+                    message = 'Invalid email or password.';
                 }
                 
                 errorMessage.textContent = message;
