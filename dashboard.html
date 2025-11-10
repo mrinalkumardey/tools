@@ -10,7 +10,6 @@
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -20,7 +19,6 @@
             align-items: center;
             padding: 20px;
         }
-
         .user-bar {
             width: 100%;
             max-width: 1200px;
@@ -34,13 +32,11 @@
             margin-bottom: 20px;
             color: white;
         }
-
         .user-info {
             display: flex;
             align-items: center;
             gap: 10px;
         }
-
         .user-icon {
             width: 40px;
             height: 40px;
@@ -51,7 +47,6 @@
             justify-content: center;
             font-size: 1.2rem;
         }
-
         .logout-btn {
             padding: 10px 20px;
             background: rgba(255, 255, 255, 0.2);
@@ -62,30 +57,25 @@
             font-weight: 600;
             transition: all 0.3s;
         }
-
         .logout-btn:hover {
             background: white;
             color: #667eea;
         }
-
         .header {
             text-align: center;
             color: white;
             margin-bottom: 40px;
         }
-
         .header h1 {
             font-size: 2.5rem;
             font-weight: 700;
             margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
         }
-
         .header p {
             font-size: 1.1rem;
             opacity: 0.95;
         }
-
         .dashboard-container {
             max-width: 1200px;
             width: 100%;
@@ -94,7 +84,6 @@
             gap: 30px;
             padding: 20px;
         }
-
         .tool-card {
             background: white;
             border-radius: 20px;
@@ -112,7 +101,6 @@
             position: relative;
             overflow: hidden;
         }
-
         .tool-card::before {
             content: '';
             position: absolute;
@@ -124,39 +112,32 @@
             transform: scaleX(0);
             transition: transform 0.3s ease;
         }
-
         .tool-card:hover::before {
             transform: scaleX(1);
         }
-
         .tool-card:hover {
             transform: translateY(-10px);
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
         }
-
         .tool-icon {
             font-size: 3.5rem;
             margin-bottom: 20px;
         }
-
         .tool-card h2 {
             font-size: 1.5rem;
             color: #333;
             margin-bottom: 15px;
             font-weight: 600;
         }
-
         .tool-card p {
             color: #666;
             font-size: 0.95rem;
             line-height: 1.6;
         }
-
         .tool-card:nth-child(1) .tool-icon { color: #667eea; }
         .tool-card:nth-child(2) .tool-icon { color: #f093fb; }
         .tool-card:nth-child(3) .tool-icon { color: #4facfe; }
         .tool-card:nth-child(4) .tool-icon { color: #43e97b; }
-
         .footer {
             margin-top: 50px;
             text-align: center;
@@ -164,17 +145,14 @@
             font-size: 0.9rem;
             opacity: 0.9;
         }
-
         .footer a {
             color: white;
             text-decoration: none;
             font-weight: 600;
         }
-
         .footer a:hover {
             text-decoration: underline;
         }
-
         .loading {
             display: flex;
             justify-content: center;
@@ -183,26 +161,21 @@
             color: white;
             font-size: 1.2rem;
         }
-
         @media (max-width: 768px) {
             .dashboard-container {
                 grid-template-columns: 1fr;
                 gap: 20px;
             }
-
             .header h1 {
                 font-size: 2rem;
             }
-
             .tool-card {
                 min-height: 200px;
                 padding: 30px 20px;
             }
-
             .tool-icon {
                 font-size: 2.5rem;
             }
-
             .user-bar {
                 flex-direction: column;
                 gap: 10px;
@@ -214,50 +187,48 @@
     <div id="loading" class="loading">
         <p>Loading...</p>
     </div>
-
     <div id="content" style="display: none; width: 100%;">
         <div class="user-bar">
             <div class="user-info">
-                <div class="user-icon">👤</div>
+                <div class="user-icon">User</div>
                 <div>
                     <div style="font-weight: 600;" id="userName">Loading...</div>
                     <div style="font-size: 0.85rem; opacity: 0.9;" id="userEmail"></div>
                 </div>
             </div>
-            <button class="logout-btn" id="logoutBtn">Logout</button>
+            <div style="display: flex; gap: 10px;">
+                <button onclick="window.location.href='admin-panel.html'" style="padding: 10px 20px; background: rgba(255, 255, 255, 0.2); color: white; border: 2px solid white; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s;">
+                    Admin Panel
+                </button>
+                <button class="logout-btn" id="logoutBtn">Logout</button>
+            </div>
         </div>
-
         <div class="header">
             <h1>BU Tool Dashboard</h1>
             <p>Your Professional Banking Tools</p>
         </div>
-
         <div class="dashboard-container">
             <a href="npasolg.html" class="tool-card">
-                <div class="tool-icon">📄</div>
+                <div class="tool-icon">Document</div>
                 <h2>Settlement Offer Letter</h2>
                 <p>Generate professional settlement offer letters for loan accounts</p>
             </a>
-
             <a href="insurance_gen.html" class="tool-card">
-                <div class="tool-icon">🛡️</div>
+                <div class="tool-icon">Shield</div>
                 <h2>Insurance Form Generator</h2>
                 <p>Create and fill insurance forms for life and health insurance</p>
             </a>
-
             <a href="odnotice.html" class="tool-card">
-                <div class="tool-icon">⚠️</div>
+                <div class="tool-icon">Warning</div>
                 <h2>Overdue Notice</h2>
                 <p>Generate overdue payment notices for loan accounts</p>
             </a>
-
             <a href="loan_eligibility.html" class="tool-card">
-                <div class="tool-icon">🧮</div>
+                <div class="tool-icon">Calculator</div>
                 <h2>Loan Eligibility Calculator</h2>
                 <p>Calculate Sahayata loan eligibility based on income and FOIR</p>
             </a>
         </div>
-
         <div class="footer">
             <p>Developed by <a href="https://www.linkedin.com/in/mrinal-kumar-dey" target="_blank">Mrinal Kumar</a></p>
         </div>
@@ -280,8 +251,7 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app);
-        const db = getFirestore(app);
+        const db = getFirestore(app); // Only once — fixed!
 
         const loading = document.getElementById('loading');
         const content = document.getElementById('content');
@@ -289,7 +259,7 @@
         const userName = document.getElementById('userName');
         const userEmail = document.getElementById('userEmail');
 
-        // Check authentication
+        // Check authentication state
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 // User is logged in
@@ -297,22 +267,24 @@
                 content.style.display = 'flex';
                 content.style.flexDirection = 'column';
                 content.style.alignItems = 'center';
-                
-                // Display user info
+
                 const email = user.email;
-                const name = email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                const name = email.split('@')[0]
+                    .replace(/[._]/g, ' ')
+                    .replace(/\b\w/g, l => l.toUpperCase());
+
                 userName.textContent = name;
                 userEmail.textContent = email;
 
                 // Log dashboard access
                 logActivity(user.uid, email, 'Dashboard', 'Accessed dashboard');
             } else {
-                // User is not logged in - redirect to login
+                // Not logged in → redirect to login
                 window.location.href = 'login.html';
             }
         });
 
-        // Logout functionality
+        // Logout button
         logoutBtn.addEventListener('click', async () => {
             try {
                 await signOut(auth);
@@ -325,7 +297,7 @@
 
         // Auto-logout after 10 minutes of inactivity
         let inactivityTimer;
-        const INACTIVITY_TIMEOUT = 10 * 60 * 1000; // 10 minutes in milliseconds
+        const INACTIVITY_TIMEOUT = 10 * 60 * 1000; // 10 minutes
 
         function resetInactivityTimer() {
             clearTimeout(inactivityTimer);
@@ -340,15 +312,14 @@
             }, INACTIVITY_TIMEOUT);
         }
 
-        // Listen for user activity
+        // Reset timer on user activity
         ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'].forEach(event => {
             document.addEventListener(event, resetInactivityTimer, true);
         });
 
-        // Start the timer
-        resetInactivityTimer();
+        resetInactivityTimer(); // Start timer
 
-        // Function to log user activity
+        // Log user activity
         async function logActivity(userId, userEmail, toolName, action) {
             try {
                 await addDoc(collection(db, 'activity_logs'), {
@@ -359,11 +330,17 @@
                     timestamp: serverTimestamp(),
                     userAgent: navigator.userAgent
                 });
-                console.log('Activity logged:', toolName, action);
             } catch (error) {
                 console.error('Error logging activity:', error);
             }
         }
+
+        // Optional: Show warning if loading takes too long
+        setTimeout(() => {
+            if (loading.style.display !== 'none') {
+                loading.innerHTML = '<p style="color: #ffcc00;">Taking longer than usual...<br>Check your internet connection.</p>';
+            }
+        }, 10000);
     </script>
 </body>
 </html>
