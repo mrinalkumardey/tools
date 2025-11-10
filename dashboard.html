@@ -196,12 +196,7 @@
                     <div style="font-size: 0.85rem; opacity: 0.9;" id="userEmail"></div>
                 </div>
             </div>
-            <div style="display: flex; gap: 10px;">
-                <button onclick="window.location.href='admin-panel.html'" style="padding: 10px 20px; background: rgba(255, 255, 255, 0.2); color: white; border: 2px solid white; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s;">
-                    Admin Panel
-                </button>
-                <button class="logout-btn" id="logoutBtn">Logout</button>
-            </div>
+            <button class="logout-btn" id="logoutBtn">Logout</button>
         </div>
         <div class="header">
             <h1>BU Tool Dashboard</h1>
@@ -251,7 +246,7 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app); // Only once — fixed!
+        const db = getFirestore(app); // Fixed: Only one declaration
 
         const loading = document.getElementById('loading');
         const content = document.getElementById('content');
@@ -259,10 +254,8 @@
         const userName = document.getElementById('userName');
         const userEmail = document.getElementById('userEmail');
 
-        // Check authentication state
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // User is logged in
                 loading.style.display = 'none';
                 content.style.display = 'flex';
                 content.style.flexDirection = 'column';
@@ -276,15 +269,12 @@
                 userName.textContent = name;
                 userEmail.textContent = email;
 
-                // Log dashboard access
                 logActivity(user.uid, email, 'Dashboard', 'Accessed dashboard');
             } else {
-                // Not logged in → redirect to login
                 window.location.href = 'login.html';
             }
         });
 
-        // Logout button
         logoutBtn.addEventListener('click', async () => {
             try {
                 await signOut(auth);
@@ -295,9 +285,9 @@
             }
         });
 
-        // Auto-logout after 10 minutes of inactivity
+        // Auto-logout after 5 minutes of inactivity
         let inactivityTimer;
-        const INACTIVITY_TIMEOUT = 10 * 60 * 1000; // 10 minutes
+        const INACTIVITY_TIMEOUT = 5 * 60 * 1000;
 
         function resetInactivityTimer() {
             clearTimeout(inactivityTimer);
@@ -312,21 +302,15 @@
             }, INACTIVITY_TIMEOUT);
         }
 
-        // Reset timer on user activity
         ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'].forEach(event => {
             document.addEventListener(event, resetInactivityTimer, true);
         });
+        resetInactivityTimer();
 
-        resetInactivityTimer(); // Start timer
-
-        // Log user activity
         async function logActivity(userId, userEmail, toolName, action) {
             try {
                 await addDoc(collection(db, 'activity_logs'), {
-                    userId: userId,
-                    userEmail: userEmail,
-                    toolName: toolName,
-                    action: action,
+                    userId, userEmail, toolName, action,
                     timestamp: serverTimestamp(),
                     userAgent: navigator.userAgent
                 });
