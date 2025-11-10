@@ -224,7 +224,12 @@
                     <div style="font-size: 0.85rem; opacity: 0.9;" id="userEmail"></div>
                 </div>
             </div>
-            <button class="logout-btn" id="logoutBtn">Logout</button>
+            <div style="display: flex; gap: 10px;">
+                <button onclick="window.location.href='admin-panel.html'" style="padding: 10px 20px; background: rgba(255, 255, 255, 0.2); color: white; border: 2px solid white; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s;">
+                    Admin Panel
+                </button>
+                <button class="logout-btn" id="logoutBtn">Logout</button>
+            </div>
         </div>
 
         <div class="header">
@@ -280,6 +285,8 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
+        const db = getFirestore(app);
 
         const loading = document.getElementById('loading');
         const content = document.getElementById('content');
@@ -301,6 +308,9 @@
                 const name = email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
                 userName.textContent = name;
                 userEmail.textContent = email;
+
+                // Log dashboard access
+                logActivity(user.uid, email, 'Dashboard', 'Accessed dashboard');
             } else {
                 // User is not logged in - redirect to login
                 window.location.href = 'login.html';
@@ -342,6 +352,23 @@
 
         // Start the timer
         resetInactivityTimer();
+
+        // Function to log user activity
+        async function logActivity(userId, userEmail, toolName, action) {
+            try {
+                await addDoc(collection(db, 'activity_logs'), {
+                    userId: userId,
+                    userEmail: userEmail,
+                    toolName: toolName,
+                    action: action,
+                    timestamp: serverTimestamp(),
+                    userAgent: navigator.userAgent
+                });
+                console.log('Activity logged:', toolName, action);
+            } catch (error) {
+                console.error('Error logging activity:', error);
+            }
+        }
     </script>
 </body>
 </html>
