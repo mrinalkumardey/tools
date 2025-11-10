@@ -328,9 +328,9 @@
             }
         });
 
-        // Auto-logout after 5 minutes of inactivity
+        // Auto-logout after 10 minutes of inactivity
         let inactivityTimer;
-        const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 minutes in milliseconds
+        const INACTIVITY_TIMEOUT = 10 * 60 * 1000; // 10 minutes in milliseconds
 
         function resetInactivityTimer() {
             clearTimeout(inactivityTimer);
